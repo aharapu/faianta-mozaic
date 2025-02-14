@@ -71,11 +71,9 @@ function App() {
           onChange={(e) => setNumTiles(parseInt(e.target.value))}
         />
         <label htmlFor="backgroundColor">Background color: </label>
-        <input
-          id="backgroundColor"
-          type="color"
-          value={backgroundColor}
-          onChange={(e) => setBackgroundColor(e.target.value)}
+        <ColorPicker
+          color={backgroundColor}
+          onChange={(color) => setBackgroundColor(color)}
         />
       </div>
       <div
