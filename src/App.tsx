@@ -109,7 +109,7 @@ function App() {
         >
           {colors.map((color, i) => (
             <div
-              key={`${color.occuranceWeight}-${color.color}`}
+              key={color.id}
               style={{
                 display: "flex",
                 gap: "1rem",
@@ -156,6 +156,7 @@ function App() {
           onClick={() => {
             const newColors = [...colors];
             newColors.push({
+              id: Date.now().toString(),
               occuranceWeight: 0,
               color: getRandomColor(),
             });

@@ -1,4 +1,5 @@
 export interface TileColor {
+  id: string;
   occuranceWeight: number;
   color: string;
 }

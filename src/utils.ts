@@ -60,18 +60,22 @@ export function getTileStyle(
 export function getInitialColors(): Array<TileColor> {
   return [
     {
+      id: "1",
       occuranceWeight: 60,
       color: "#123456",
     },
     {
+      id: "2",
       occuranceWeight: 20,
       color: "#789abc",
     },
     {
+      id: "3",
       occuranceWeight: 10,
       color: "#abc123",
     },
     {
+      id: "4",
       occuranceWeight: 10,
       color: "#123abc",
     },

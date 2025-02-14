@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { SavedConfiguration } from "./types";
+import { SavedConfiguration, TileColor } from "./types";
 
 interface ConfigurationsProps {
   configName: string;
@@ -14,10 +14,8 @@ interface ConfigurationsProps {
   setCornerSize: React.Dispatch<React.SetStateAction<number>>;
   backgroundColor: string;
   setBackgroundColor: React.Dispatch<React.SetStateAction<string>>;
-  colors: Array<{ occuranceWeight: number; color: string }>;
-  setColors: React.Dispatch<
-    React.SetStateAction<Array<{ occuranceWeight: number; color: string }>>
-  >;
+  colors: Array<TileColor>;
+  setColors: React.Dispatch<React.SetStateAction<Array<TileColor>>>;
   configurations: Array<SavedConfiguration>;
   setConfigurations: React.Dispatch<
     React.SetStateAction<Array<SavedConfiguration>>
