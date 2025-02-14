@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { SavedConfiguration } from "./types";
 
 interface ConfigurationsProps {
@@ -42,6 +42,8 @@ export default function Configurations({
   configurations,
   setConfigurations,
 }: Readonly<ConfigurationsProps>) {
+  const [err, setErr] = useState("");
+
   useEffect(() => {
     const savedConfigurations = localStorage.getItem("configurations");
     if (savedConfigurations) {
@@ -50,6 +52,17 @@ export default function Configurations({
   }, []);
 
   const handleSaveConfig = () => {
+    if (!configName) {
+      setErr("Config name is required");
+      return;
+    }
+
+    const existingConfig = configurations.find((c) => c.name === configName);
+    if (existingConfig) {
+      setErr("Config with same name already exists");
+      return;
+    }
+
     const newConfig = {
       name: configName,
       gap,
@@ -61,32 +74,29 @@ export default function Configurations({
     };
     setConfigurations((prev) => [...(prev || []), newConfig]);
 
-    // add to local storage
     localStorage.setItem(
       "configurations",
       JSON.stringify([...(configurations || []), newConfig])
     );
   };
 
+  const handleRemoveConfig = (name: string) => {
+    const newConfigurations = configurations.filter((c) => c.name !== name);
+    setConfigurations(newConfigurations);
+    localStorage.setItem("configurations", JSON.stringify(newConfigurations));
+  };
+
+  const handleConfigNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setConfigName(e.target.value);
+    setErr("");
+  };
+
   return (
     <div>
-      <label htmlFor="configName">Config name: </label>
-      <input
-        id="configName"
-        type="text"
-        value={configName}
-        onChange={(e) => setConfigName(e.target.value)}
-      />
-      <button
-        style={{ backgroundColor: "green", color: "white" }}
-        onClick={handleSaveConfig}
-      >
-        Save config
-      </button>
       <div
         style={{ marginTop: "1rem", display: "flex", flexDirection: "column" }}
       >
-        {configurations.map((config, i) => (
+        {configurations.map((config) => (
           <div
             key={config.name}
             style={{
@@ -118,17 +128,27 @@ export default function Configurations({
                 color: "white",
                 padding: 5,
               }}
-              onClick={() => {
-                const newConfigurations = [...configurations];
-                newConfigurations.splice(i, 1);
-                setConfigurations(newConfigurations);
-              }}
+              onClick={() => handleRemoveConfig(config.name)}
             >
               Remove config
             </button>
           </div>
         ))}
       </div>
+      <label htmlFor="configName">Config name: </label>
+      <input
+        id="configName"
+        type="text"
+        value={configName}
+        onChange={handleConfigNameChange}
+      />
+      <button
+        style={{ backgroundColor: "green", color: "white" }}
+        onClick={handleSaveConfig}
+      >
+        Save config
+      </button>
+      {err && <p style={{ color: "red", fontWeight: "bold" }}>{err}</p>}
     </div>
   );
 }
