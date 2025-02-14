@@ -1,4 +1,6 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
+import { PhotoshopPicker } from "react-color";
+
 import "./App.css";
 
 interface TileColor {
@@ -71,30 +73,53 @@ function App() {
           onChange={(e) => setBackgroundColor(e.target.value)}
         />
       </div>
-      <div>
-        <label htmlFor="tileSize">Colors: </label>
-        {colors.map((color, i) => (
-          <div key={i}>
-            <input
-              type="number"
-              value={color.occuranceWeight}
-              onChange={(e) => {
-                const newColors = [...colors];
-                newColors[i].occuranceWeight = parseInt(e.target.value);
-                setColors(newColors);
+      <div
+        style={{
+          marginBottom: "1rem",
+          border: "1px solid black",
+          padding: "1rem",
+        }}
+      >
+        <h4>Colors: </h4>
+        <div
+          style={{
+            marginBottom: "1rem",
+            display: "flex",
+            gap: "1rem",
+            flexWrap: "wrap",
+          }}
+        >
+          {colors.map((color, i) => (
+            <div
+              key={i}
+              style={{
+                display: "flex",
+                gap: "1rem",
+                border: "1px solid black",
               }}
-            />
-            <input
-              type="color"
-              value={color.color}
-              onChange={(e) => {
-                const newColors = [...colors];
-                newColors[i].color = e.target.value;
-                setColors(newColors);
-              }}
-            />
-          </div>
-        ))}
+            >
+              <label htmlFor={`occuranceWeight-${i}`}>Weight: </label>
+              <input
+                type="number"
+                value={color.occuranceWeight}
+                id={`occuranceWeight-${i}`}
+                onChange={(e) => {
+                  const newColors = [...colors];
+                  newColors[i].occuranceWeight = parseInt(e.target.value);
+                  setColors(newColors);
+                }}
+              />
+              <ColorPicker
+                color={color.color}
+                onChange={(color) => {
+                  const newColors = [...colors];
+                  newColors[i].color = color;
+                  setColors(newColors);
+                }}
+              />
+            </div>
+          ))}
+        </div>
         <p>
           Total: {colors.reduce((acc, curr) => acc + curr.occuranceWeight, 0)}
         </p>
@@ -124,18 +149,60 @@ function App() {
   );
 }
 
-// interface ColorPickerProps {
-//   color: string;
-//   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-// }
+interface ColorPickerProps {
+  color: string;
+  onChange: (color: string) => void;
+}
 
-// function ColorPicker({ color, onChange }: Readonly<ColorPickerProps>) {
-//   return (
-//     <div>
-//       <input type="color" value={color} onChange={onChange} />
-//     </div>
-//   );
-// }
+function ColorPicker({ color, onChange }: ColorPickerProps) {
+  const [showPicker, setShowPicker] = useState(false);
+  const [currentColor, setCurrentColor] = useState(color);
+  const colorBeforePicking = useRef(color);
+
+  const handleColorChange = (color: { hex: string }) => {
+    setCurrentColor(color.hex);
+  };
+
+  const handleColorChangeComplete = (color: { hex: string }) => {
+    setCurrentColor(color.hex);
+  };
+
+  const handleAccept = () => {
+    setShowPicker(false);
+    onChange(currentColor);
+  };
+
+  const handleCancel = () => {
+    setShowPicker(false);
+    setCurrentColor(colorBeforePicking.current);
+  };
+
+  const handleClick = () => {
+    setShowPicker(!showPicker);
+    if (showPicker) {
+      handleCancel();
+    }
+
+    if (!showPicker) {
+      colorBeforePicking.current = color;
+    }
+  };
+
+  return (
+    <div>
+      <button onClick={handleClick}>{currentColor}</button>
+      {showPicker && (
+        <PhotoshopPicker
+          color={currentColor}
+          onChange={handleColorChange}
+          onChangeComplete={handleColorChangeComplete}
+          onAccept={handleAccept}
+          onCancel={handleCancel}
+        />
+      )}
+    </div>
+  );
+}
 
 export default App;
 
