@@ -1,39 +1,27 @@
-import { useRef, useState } from "react";
-import { PhotoshopPicker } from "react-color";
+import { useState } from "react";
 
 import "./App.css";
-
-interface TileColor {
-  occuranceWeight: number;
-  color: string;
-}
-
-const initialColors: Array<TileColor> = [
-  {
-    occuranceWeight: 60,
-    color: "#123456",
-  },
-  {
-    occuranceWeight: 20,
-    color: "#789abc",
-  },
-  {
-    occuranceWeight: 10,
-    color: "#abc123",
-  },
-  {
-    occuranceWeight: 10,
-    color: "#123abc",
-  },
-];
+import { ColorPicker } from "./ColorPicker";
+import {
+  getColor,
+  getInitialColors,
+  getRandomColor,
+  getTileStyle,
+} from "./utils";
+import { SavedConfiguration, TileColor } from "./types";
+import Configurations from "./Configurations";
 
 function App() {
-  const [colors, setColors] = useState<Array<TileColor>>(initialColors);
+  const [colors, setColors] = useState<Array<TileColor>>(getInitialColors());
   const [gap, setGap] = useState(6);
   const [tileSize, setTileSize] = useState(50);
   const [numTiles, setNumTiles] = useState(300);
   const [cornerSize, setCornerSize] = useState(5);
   const [backgroundColor, setBackgroundColor] = useState("#000000");
+  const [configName, setConfigName] = useState("");
+  const [configurations, setConfigurations] = useState<
+    Array<SavedConfiguration>
+  >([]);
 
   const totalWeight = colors.reduce(
     (acc, curr) => acc + curr.occuranceWeight,
@@ -42,6 +30,24 @@ function App() {
 
   return (
     <>
+      <Configurations
+        configName={configName}
+        setConfigName={setConfigName}
+        gap={gap}
+        setGap={setGap}
+        tileSize={tileSize}
+        setTileSize={setTileSize}
+        numTiles={numTiles}
+        setNumTiles={setNumTiles}
+        cornerSize={cornerSize}
+        setCornerSize={setCornerSize}
+        backgroundColor={backgroundColor}
+        setBackgroundColor={setBackgroundColor}
+        colors={colors}
+        setColors={setColors}
+        configurations={configurations}
+        setConfigurations={setConfigurations}
+      />
       <div
         style={{
           marginBottom: "1rem",
@@ -84,6 +90,7 @@ function App() {
           onChange={(color) => setBackgroundColor(color)}
         />
       </div>
+
       <div
         style={{
           marginBottom: "1rem",
@@ -190,120 +197,4 @@ function App() {
   );
 }
 
-function getTileStyle(tileSize: number, borderRadius: number, color: string) {
-  const baseStyle = {
-    display: "inline-block",
-    boxShadow: `
-      inset 0 0 10px rgba(255, 255, 255, 0.35),
-      inset 0 0 20px rgba(255, 255, 255, 0.15)
-    `,
-  };
-
-  return {
-    ...baseStyle,
-    borderRadius: `${borderRadius}px`,
-    width: tileSize,
-    height: tileSize,
-    backgroundColor: color,
-  };
-}
-
-interface ColorPickerProps {
-  color: string;
-  onChange: (color: string) => void;
-}
-
-function ColorPicker({ color, onChange }: Readonly<ColorPickerProps>) {
-  const [showPicker, setShowPicker] = useState(false);
-  const [currentColor, setCurrentColor] = useState(color);
-  const colorBeforePicking = useRef(color);
-
-  const handleColorChange = (color: { hex: string }) => {
-    setCurrentColor(color.hex);
-  };
-
-  const handleColorChangeComplete = (color: { hex: string }) => {
-    setCurrentColor(color.hex);
-  };
-
-  const handleAccept = () => {
-    setShowPicker(false);
-    onChange(currentColor);
-  };
-
-  const handleCancel = () => {
-    setShowPicker(false);
-    setCurrentColor(colorBeforePicking.current);
-  };
-
-  const handleClick = () => {
-    setShowPicker(!showPicker);
-    if (showPicker) {
-      handleCancel();
-    }
-
-    if (!showPicker) {
-      colorBeforePicking.current = color;
-    }
-  };
-
-  return (
-    <div>
-      <button
-        style={{
-          backgroundColor: currentColor,
-          color: getTextColor(currentColor),
-        }}
-        onClick={handleClick}
-      >
-        {currentColor}
-      </button>
-      {showPicker && (
-        <PhotoshopPicker
-          color={currentColor}
-          onChange={handleColorChange}
-          onChangeComplete={handleColorChangeComplete}
-          onAccept={handleAccept}
-          onCancel={handleCancel}
-        />
-      )}
-    </div>
-  );
-}
-
 export default App;
-
-function getColor(colors: Array<TileColor>) {
-  const totalWeight = colors.reduce(
-    (acc, curr) => acc + curr.occuranceWeight,
-    0
-  );
-  const random = Math.floor(Math.random() * totalWeight);
-  let currentWeight = 0;
-  for (const color of colors) {
-    currentWeight += color.occuranceWeight;
-    if (random < currentWeight) {
-      return color.color;
-    }
-  }
-  return colors[0].color;
-}
-
-function getTextColor(backgroundColor: string) {
-  const r = parseInt(backgroundColor.substring(1, 3), 16);
-  const g = parseInt(backgroundColor.substring(3, 5), 16);
-  const b = parseInt(backgroundColor.substring(5, 7), 16);
-
-  const luminance = (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255;
-
-  return luminance < 0.5 ? "#FFFFFF" : "#000000";
-}
-
-function getRandomColor() {
-  const letters = "0123456789ABCDEF";
-  let color = "#";
-  for (let i = 0; i < 6; i++) {
-    color += letters[Math.floor(Math.random() * 16)];
-  }
-  return color;
-}
