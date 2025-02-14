@@ -29,9 +29,10 @@ const initialColors: Array<TileColor> = [
 
 function App() {
   const [colors, setColors] = useState<Array<TileColor>>(initialColors);
-  const [gap, setGap] = useState(8);
+  const [gap, setGap] = useState(6);
   const [tileSize, setTileSize] = useState(50);
   const [numTiles, setNumTiles] = useState(300);
+  const [cornerSize, setCornerSize] = useState(5);
   const [backgroundColor, setBackgroundColor] = useState("#000000");
 
   const totalWeight = colors.reduce(
@@ -62,6 +63,13 @@ function App() {
           type="number"
           value={tileSize}
           onChange={(e) => setTileSize(parseInt(e.target.value))}
+        />
+        <label htmlFor="cornerSize">Corner size: </label>
+        <input
+          id="cornerSize"
+          type="number"
+          value={cornerSize}
+          onChange={(e) => setCornerSize(parseInt(e.target.value))}
         />
         <label htmlFor="numTiles">Number of tiles: </label>
         <input
@@ -166,19 +174,38 @@ function App() {
           padding: "30px",
         }}
       >
-        {new Array(numTiles).fill(0).map((_, i) => (
-          <div
-            key={i}
-            style={{
-              width: tileSize,
-              height: tileSize,
-              backgroundColor: getColor(colors),
-            }}
-          ></div>
-        ))}
+        {new Array(numTiles).fill(0).map((_, i) => {
+          const color = getColor(colors);
+
+          return (
+            <div
+              key={`tile-${i}-${color}`}
+              className="tile"
+              style={getTileStyle(tileSize, cornerSize, color)}
+            ></div>
+          );
+        })}
       </div>
     </>
   );
+}
+
+function getTileStyle(tileSize: number, borderRadius: number, color: string) {
+  const baseStyle = {
+    display: "inline-block",
+    boxShadow: `
+      inset 0 0 10px rgba(255, 255, 255, 0.35),
+      inset 0 0 20px rgba(255, 255, 255, 0.15)
+    `,
+  };
+
+  return {
+    ...baseStyle,
+    borderRadius: `${borderRadius}px`,
+    width: tileSize,
+    height: tileSize,
+    backgroundColor: color,
+  };
 }
 
 interface ColorPickerProps {
@@ -186,7 +213,7 @@ interface ColorPickerProps {
   onChange: (color: string) => void;
 }
 
-function ColorPicker({ color, onChange }: ColorPickerProps) {
+function ColorPicker({ color, onChange }: Readonly<ColorPickerProps>) {
   const [showPicker, setShowPicker] = useState(false);
   const [currentColor, setCurrentColor] = useState(color);
   const colorBeforePicking = useRef(color);
@@ -253,10 +280,10 @@ function getColor(colors: Array<TileColor>) {
   );
   const random = Math.floor(Math.random() * totalWeight);
   let currentWeight = 0;
-  for (let i = 0; i < colors.length; i++) {
-    currentWeight += colors[i].occuranceWeight;
+  for (const color of colors) {
+    currentWeight += color.occuranceWeight;
     if (random < currentWeight) {
-      return colors[i].color;
+      return color.color;
     }
   }
   return colors[0].color;
