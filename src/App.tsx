@@ -117,9 +117,35 @@ function App() {
                   setColors(newColors);
                 }}
               />
+              <button
+                style={{
+                  backgroundColor: "rgba(161, 75, 75, 0.6)",
+                  color: "white",
+                }}
+                onClick={() => {
+                  const newColors = [...colors];
+                  newColors.splice(i, 1);
+                  setColors(newColors);
+                }}
+              >
+                Remove
+              </button>
             </div>
           ))}
         </div>
+        <button
+          style={{ backgroundColor: "green", color: "white" }}
+          onClick={() => {
+            const newColors = [...colors];
+            newColors.push({
+              occuranceWeight: 0,
+              color: "#000000",
+            });
+            setColors(newColors);
+          }}
+        >
+          Add color
+        </button>
         <p>
           Total: {colors.reduce((acc, curr) => acc + curr.occuranceWeight, 0)}
         </p>
@@ -190,7 +216,15 @@ function ColorPicker({ color, onChange }: ColorPickerProps) {
 
   return (
     <div>
-      <button onClick={handleClick}>{currentColor}</button>
+      <button
+        style={{
+          backgroundColor: currentColor,
+          color: getTextColor(currentColor),
+        }}
+        onClick={handleClick}
+      >
+        {currentColor}
+      </button>
       {showPicker && (
         <PhotoshopPicker
           color={currentColor}
@@ -220,4 +254,14 @@ function getColor(colors: Array<TileColor>) {
     }
   }
   return colors[0].color;
+}
+
+function getTextColor(backgroundColor: string) {
+  const r = parseInt(backgroundColor.substring(1, 3), 16);
+  const g = parseInt(backgroundColor.substring(3, 5), 16);
+  const b = parseInt(backgroundColor.substring(5, 7), 16);
+
+  const luminance = (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255;
+
+  return luminance < 0.5 ? "#FFFFFF" : "#000000";
 }
