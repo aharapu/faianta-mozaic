@@ -34,6 +34,11 @@ function App() {
   const [numTiles, setNumTiles] = useState(300);
   const [backgroundColor, setBackgroundColor] = useState("#000000");
 
+  const totalWeight = colors.reduce(
+    (acc, curr) => acc + curr.occuranceWeight,
+    0
+  );
+
   return (
     <>
       <div
@@ -91,7 +96,7 @@ function App() {
         >
           {colors.map((color, i) => (
             <div
-              key={i}
+              key={`${color.occuranceWeight}-${color.color}`}
               style={{
                 display: "flex",
                 gap: "1rem",
@@ -139,7 +144,7 @@ function App() {
             const newColors = [...colors];
             newColors.push({
               occuranceWeight: 0,
-              color: "#000000",
+              color: getRandomColor(),
             });
             setColors(newColors);
           }}
@@ -147,7 +152,10 @@ function App() {
           Add color
         </button>
         <p>
-          Total: {colors.reduce((acc, curr) => acc + curr.occuranceWeight, 0)}
+          Weights Total: {totalWeight}
+          {totalWeight !== 100
+            ? " (should be 100 to represent a percentage)"
+            : ""}
         </p>
       </div>
       <div
@@ -264,4 +272,13 @@ function getTextColor(backgroundColor: string) {
   const luminance = (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255;
 
   return luminance < 0.5 ? "#FFFFFF" : "#000000";
+}
+
+function getRandomColor() {
+  const letters = "0123456789ABCDEF";
+  let color = "#";
+  for (let i = 0; i < 6; i++) {
+    color += letters[Math.floor(Math.random() * 16)];
+  }
+  return color;
 }
